@@ -80,3 +80,4 @@ cobertura.xml
 
 # pprof results
 profile*.png
+*.db
