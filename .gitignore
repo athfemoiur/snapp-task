@@ -1,0 +1,82 @@
+# Created by https://www.gitignore.io/api/go,vim
+
+### Go ###
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+vendor
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.exe
+*.test
+*.prof
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+*.coverprofile
+coverage.txt
+
+
+### Vim ###
+# swap
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+# session
+Session.vim
+# temporary
+.netrwhist
+*~
+.vim
+
+# IDEA
+.idea/workspace.xml
+.idea/tasks.xml
+
+# auto-generated tag files
+tags
+
+# confilict files
+*.orig
+
+.agignore
+log
+
+config.yaml
+config.bak.yaml
+.env
+.idea/
+
+*.log
+
+.vscode
+debug
+
+# Ansible retry files
+*.retry
+
+.ignore
+
+go.sum
+.history/
+
+junit.xml
+cobertura.xml
+
+# pprof results
+profile*.png
