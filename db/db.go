@@ -1,4 +1,4 @@
-package main
+package db
 
 //go:generate moq -out=mocked_db.go . DB
 type DB interface {

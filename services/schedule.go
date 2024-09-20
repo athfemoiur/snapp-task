@@ -1,8 +1,9 @@
-package main
+package services
 
 import (
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
+	"snapp-task/db"
 	"time"
 )
 
@@ -11,17 +12,17 @@ type CheckScheduler interface {
 	ScheduleCheck()
 }
 
-type SchedulerFactory func(url, pattern string, interval time.Duration, db DB) CheckScheduler
+type SchedulerFactory func(url, pattern string, interval time.Duration, db db.DB) CheckScheduler
 
 type CheckSchedulerImpl struct {
 	Url               string
 	Pattern           string
 	Interval          time.Duration
-	Db                DB
+	Db                db.DB
 	UrlCheckerFactory UrlCheckerFactory
 }
 
-func NewCheckSchedulerImpl(url, pattern string, interval time.Duration, db DB, urlCheckerFactory UrlCheckerFactory) CheckScheduler {
+func NewCheckSchedulerImpl(url, pattern string, interval time.Duration, db db.DB, urlCheckerFactory UrlCheckerFactory) CheckScheduler {
 	return &CheckSchedulerImpl{Url: url, Pattern: pattern, Interval: interval, Db: db, UrlCheckerFactory: urlCheckerFactory}
 }
 
@@ -42,7 +43,7 @@ func (cs CheckSchedulerImpl) ScheduleCheck() {
 			}()
 
 		case err := <-errorChan:
-			fmt.Printf("Error encountered: %v\n", err)
+			log.Printf("Error encountered: %v\n", err)
 		}
 	}
 }

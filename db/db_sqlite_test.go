@@ -1,4 +1,4 @@
-package main_test
+package db_test
 
 import (
 	"fmt"
@@ -6,12 +6,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"os"
-	"snapp-task"
+	. "snapp-task/db"
 )
 
 var _ = Describe("SQLiteDB", func() {
 	var (
-		db             *main.SQLiteDB
+		db             *SQLiteDB
 		dataSourceName string
 	)
 
@@ -20,7 +20,7 @@ var _ = Describe("SQLiteDB", func() {
 		Expect(err).NotTo(HaveOccurred())
 		dataSourceName = file.Name()
 
-		db, err = main.NewSQLiteDB(dataSourceName)
+		db, err = NewSQLiteDB(dataSourceName)
 		Expect(err).NotTo(HaveOccurred())
 	})
 

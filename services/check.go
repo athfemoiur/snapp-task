@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"snapp-task/db"
 	"strings"
 	"time"
 )
@@ -15,21 +16,21 @@ type UrlChecker interface {
 	CheckData() error
 }
 
-type UrlCheckerFactory func(url, pattern string, db DB) UrlChecker
+type UrlCheckerFactory func(url, pattern string, db db.DB) UrlChecker
 
 type UrlCheckerImpl struct {
 	Url     string
 	Pattern string
-	Db      DB
+	Db      db.DB
 }
 
-func NewUrlCheckerImpl(url, pattern string, db DB) UrlChecker {
+func NewUrlCheckerImpl(url, pattern string, db db.DB) UrlChecker {
 	return &UrlCheckerImpl{Url: url, Pattern: pattern, Db: db}
 }
 
 func (uc *UrlCheckerImpl) CheckData() error {
 	resultChan := make(chan error)
-	timeout := 5 * time.Second
+	timeout := 1 * time.Second
 
 	go func() {
 		resultChan <- uc.checkData()
@@ -56,10 +57,17 @@ func (uc *UrlCheckerImpl) checkData() error {
 	}
 
 	contentType := resp.Header.Get("Content-Type")
-	return uc.FindMatch(body, contentType)
+	matchedData, err := uc.findMatch(body, contentType)
+	if err != nil {
+		return err
+	}
+	if matchedData == "" {
+		return nil
+	}
+	return uc.Db.SaveData(uc.Url, uc.Pattern, matchedData)
 }
 
-func (uc *UrlCheckerImpl) FindMatch(content []byte, contentType string) error {
+func (uc *UrlCheckerImpl) findMatch(content []byte, contentType string) (string, error) {
 	isRegex := uc.isRegexPattern(uc.Pattern)
 	var regex *regexp.Regexp
 	var err error
@@ -67,7 +75,7 @@ func (uc *UrlCheckerImpl) FindMatch(content []byte, contentType string) error {
 	if isRegex {
 		regex, err = regexp.Compile(uc.Pattern)
 		if err != nil {
-			return fmt.Errorf("invalid regex pattern: %v", err)
+			return "", fmt.Errorf("invalid regex pattern: %v", err)
 		}
 	}
 
@@ -78,7 +86,7 @@ func (uc *UrlCheckerImpl) FindMatch(content []byte, contentType string) error {
 		var jsonData interface{}
 		err = json.Unmarshal(content, &jsonData)
 		if err != nil {
-			return fmt.Errorf("failed to parse JSON response: %v", err)
+			return "", fmt.Errorf("failed to parse JSON response: %v", err)
 		}
 
 		matched, matchedData = uc.matchFoundInJSON(jsonData, uc.Pattern, regex)
@@ -96,18 +104,10 @@ func (uc *UrlCheckerImpl) FindMatch(content []byte, contentType string) error {
 			}
 		}
 	}
-
 	if matched {
-		err := uc.Db.SaveData(uc.Url, uc.Pattern, matchedData)
-		if err != nil {
-			return fmt.Errorf("failed to insert data into DB: %v", err)
-		}
-		fmt.Printf("Matched pattern and inserted into DB: %s\n", uc.Pattern)
-	} else {
-		return fmt.Errorf("no match found for pattern: %s", uc.Pattern)
+		return matchedData, nil
 	}
-
-	return nil
+	return "", nil
 }
 
 func (uc *UrlCheckerImpl) isRegexPattern(pattern string) bool {

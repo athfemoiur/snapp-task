@@ -1,4 +1,4 @@
-package main_test
+package db_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestSnappTask(t *testing.T) {
+func TestDb(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "SnappTask Suite")
+	RunSpecs(t, "Db Suite")
 }

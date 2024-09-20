@@ -1,23 +1,28 @@
 package main
 
-import "time"
+import (
+	"snapp-task/api"
+	"snapp-task/db"
+	"snapp-task/services"
+	"time"
+)
 
 const serverAddress = ":8080"
 const dbPath = "data.db"
 
 func main() {
-	db, err := NewSQLiteDB(dbPath)
+	sqliteDB, err := db.NewSQLiteDB(dbPath)
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
-	checkerFactory := func(url, pattern string, db DB) UrlChecker {
-		return NewUrlCheckerImpl(url, pattern, db)
+	defer sqliteDB.Close()
+	checkerFactory := func(url, pattern string, db db.DB) services.UrlChecker {
+		return services.NewUrlCheckerImpl(url, pattern, db)
 	}
-	schedulerFactory := func(url, pattern string, interval time.Duration, db DB) CheckScheduler {
-		return NewCheckSchedulerImpl(url, pattern, interval, db, checkerFactory)
+	schedulerFactory := func(url, pattern string, interval time.Duration, db db.DB) services.CheckScheduler {
+		return services.NewCheckSchedulerImpl(url, pattern, interval, db, checkerFactory)
 	}
-	server := NewAPIServer(serverAddress, db, schedulerFactory)
+	server := api.NewAPIServer(serverAddress, sqliteDB, schedulerFactory)
 	if runErr := server.Run(); runErr != nil {
 		panic(runErr)
 	}

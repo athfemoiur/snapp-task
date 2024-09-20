@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"snapp-task/db"
+	"snapp-task/services"
 	"time"
 )
 
@@ -21,11 +23,11 @@ func writeJson(w http.ResponseWriter, status int, data any) error {
 
 type APIServer struct {
 	addr             string
-	db               DB
-	schedulerFactory SchedulerFactory
+	db               db.DB
+	schedulerFactory services.SchedulerFactory
 }
 
-func NewAPIServer(addr string, db DB, schedulerFactory SchedulerFactory) *APIServer {
+func NewAPIServer(addr string, db db.DB, schedulerFactory services.SchedulerFactory) *APIServer {
 	return &APIServer{
 		addr:             addr,
 		db:               db,
